@@ -1,0 +1,4 @@
+# Get snapshot description
+pre_transaction::::/usr/bin/sh -c echo\ "tmp.cmd=$(ps\ -o\ command\ --no-headers\ -p\ '${pid}')"
+# Create snapshot with timeshift-autosnap-dnf5
+pre_transaction::::/usr/bin/sh -c echo\ "$(/usr/bin/timeshift-autosnap-dnf5\ '${tmp.cmd}')"
