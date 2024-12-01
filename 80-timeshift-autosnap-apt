@@ -1,1 +1,0 @@
-DPkg::Pre-Invoke {"/usr/bin/timeshift-autosnap-apt"; };

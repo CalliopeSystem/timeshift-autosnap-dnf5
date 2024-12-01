@@ -1,12 +1,13 @@
 #!/bin/bash
 #original author: gobonja
 #adapted for apt by Willi Mutschler (wmutschl)
+#adapted for dnf5 by Calliope System
 
-[ $(findmnt / -no fstype) == "overlay" ] && { echo "==> skipping timeshift-autosnap because system is booted in Live CD mode..."; exit 0; }
+[ $(findmnt / -no fstype) == "overlay" ] && { echo "==> skipping timeshift-autosnap-dnf5 because system is booted in Live CD mode..."; exit 0; }
 
-[[ -v SKIP_AUTOSNAP ]] && { echo "==> skipping timeshift-autosnap due SKIP_AUTOSNAP environment variable being set."; exit 0; }
+[[ -v SKIP_AUTOSNAP ]] && { echo "==> skipping timeshift-autosnap-dnf5 due SKIP_AUTOSNAP environment variable being set."; exit 0; }
 
-readonly CONF_FILE=/etc/timeshift-autosnap-apt.conf
+readonly CONF_FILE=/etc/timeshift-autosnap-dnf5.conf
 readonly SNAPSHOTS_TO_DELETE=$(mktemp -u --tmpdir ${0##*/}.XXXXXXXX)
 
 readonly SNAPSHOT_NAME_DATE_PATTERN="[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}_[0-9]\{2\}-[0-9]\{2\}-[0-9]\{2\}"
@@ -31,7 +32,7 @@ get_property() {
 }
 
 if $(get_property "skipAutosnap" "boolean" "false") ; then
-    echo "==> skipping timeshift-autosnap-apt due skipAutosnap in $CONF_FILE set to TRUE." >&2; exit 0;
+    echo "==> skipping timeshift-autosnap-dnf5 due skipAutosnap in $CONF_FILE set to TRUE." >&2; exit 0;
 fi
 
 if $(get_property "snapshotBoot" "boolean" "true") ; then
@@ -49,28 +50,24 @@ if $(get_property "snapshotEFI" "boolean" "true") ; then
     eval $cmd
 fi
 
-readonly SNAPSHOT_DESCRIPTION=$(get_property "snapshotDescription" "string" "{timeshift-autosnap-apt} {created before upgrade}")
+readonly SNAPSHOT_DESCRIPTION="{timeshift-autosnap-dnf5} {$(echo $@ | head -c200)}"
 
-timeshift --create --comments "$SNAPSHOT_DESCRIPTION" || { echo "Unable to run timeshift-autosnap-apt! Please close Timeshift and try again. Script will now exit..." >&2; exit 1; }
+timeshift --create --comments "$SNAPSHOT_DESCRIPTION" || { echo "Unable to run timeshift-autosnap-dnf5! Please close Timeshift and try again. Script will now exit..." >&2; exit 1; }
 
 if $(get_property "deleteSnapshots" "boolean" "true") ; then
     timeshift --list > $SNAPSHOTS_TO_DELETE
-    sed -ni "/$SNAPSHOT_DESCRIPTION/p" $SNAPSHOTS_TO_DELETE
+    sed -ni "/{timeshift-autosnap-dnf5}/p" $SNAPSHOTS_TO_DELETE
     sed -ni "s/.*\($SNAPSHOT_NAME_DATE_PATTERN\).*/\1/p" $SNAPSHOTS_TO_DELETE
 
     count=$(($(sed -n '$=' $SNAPSHOTS_TO_DELETE)-$(get_property "maxSnapshots" "integer" "3")))
 
     if [ "$count" -gt 0 ] ; then
         sed -i $(($count))q $SNAPSHOTS_TO_DELETE
-        
+
         for snapshot in $(cat $SNAPSHOTS_TO_DELETE); do
             timeshift --delete --snapshot $snapshot
         done
     fi
-fi;
-
-if $(get_property "updateGrub" "boolean" "true") && [[ -d /etc/default/grub-btrfs ]]; then
-    grub-mkconfig -o /boot/grub/grub.cfg
 fi;
 
 exit 0
