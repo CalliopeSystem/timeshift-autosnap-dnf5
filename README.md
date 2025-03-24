@@ -26,7 +26,7 @@ Open Timeshift and configure it either using btrfs or rsync. I recommend using b
 #### Main installation
 Clone this repository and install the script and configuration file with make:
 ```bash
-git clone https://github.com/EntropyKitty/timeshift-autosnap-dnf5.git
+git clone https://github.com/CalliopeSystem/timeshift-autosnap-dnf5.git
 cd /home/$USER/timeshift-autosnap-dnf5
 sudo make install
 ```

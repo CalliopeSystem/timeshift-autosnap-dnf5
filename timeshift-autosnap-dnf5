@@ -1,7 +1,7 @@
 #!/bin/bash
 #original author: gobonja
 #adapted for apt by Willi Mutschler (wmutschl)
-#adapted for dnf5 by Entropy Kitty
+#adapted for dnf5 by Calliope System
 
 [ $(findmnt / -no fstype) == "overlay" ] && { echo "==> skipping timeshift-autosnap-dnf5 because system is booted in Live CD mode..."; exit 0; }
 
